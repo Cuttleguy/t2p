@@ -6,10 +6,14 @@ from tkinter import *
 from tkhtmlview import HTMLLabel
 import speech_recognition as sr
 from nltk.corpus import wordnet
+
 # nltk.download()
-# nltk.download('universal_tagset')
-# nltk.download('punkt')
+nltk.download('universal_tagset')
+nltk.download('punkt')
 nltk.download('wordnet')
+nltk.download('averaged_perceptron_tagger')
+
+
 # inital=Tk()
 
 
@@ -37,70 +41,102 @@ def takeCommand():
             # for Listening the command in indian
             # english we can also use 'hi-In'
             # for hindi recognizing
-            Query = r.recognize_google(audio, language='en-in')
+            Query = r.recognize_google(audio, language='en-us')
             print("the command is printed=", Query)
 
         except Exception as e:
             print(e)
             print("Say that again sir")
-            return "None"
+            return None
 
         return Query
-window=Tk()
+
+
+window = Tk()
+
+
 def findnth(haystack, needle, n):
-    parts= haystack.split(needle, n+1)
-    if len(parts)<=n+1:
+    parts = haystack.split(needle, n + 1)
+    if len(parts) <= n + 1:
         return -1
-    return len(haystack)-len(parts[-1])-len(needle)
+    return len(haystack) - len(parts[-1]) - len(needle)
+
+
 def phraseToIcon(phrase):
     try:
-        safePhrase=parse.quote_plus(phrase)
-        x = requests.get('https://thenounproject.com/search/icons/?q='+safePhrase)
-        txt=x.text
+        safePhrase = parse.quote_plus(phrase)
+        x = requests.get('https://thenounproject.com/search/icons/?q=' + safePhrase)
+        txt = x.text
 
-        imgList=txt.split("<img src=")
-        if phrase.lower()=="jupiter":
-            metas=imgList[3].split('"')
+        imgList = txt.split("<img src=")
+        if phrase.lower() == "jupiter":
+            metas = imgList[3].split('"')
+        elif phrase.lower() == "with":
+            metas = imgList[2].split('"')
+        elif phrase.lower() == "stuff":
+            metas = imgList[27].split('"')
+        # elif phrase.lower()=="new":
+        #     metas=imgList[0].split('"')
         else:
-            metas=imgList[1].split('"')
-
-        return (metas[1])
+            metas = imgList[1].split('"')
+        # print(imgList)
+        return metas[1]
     except:
         return ""
     # print(phraseToIcon(""))
-def textToPict(text,tags):
 
+
+def textToPict(text, tags):
     index = 0
     progress = 0
-    txt=""
-    ws_ts = pos_tag(text.split(),tagset="universal")
+    txt = ""
+    ws_ts = pos_tag(text.split(), tagset="universal")
     for word, tag in ws_ts:
         print(f'{word}, {tag}')
-
+        icon = ""
+        if word == "this":
+            icon = phraseToIcon("index finger pointing to the right")
+        elif word == "and":
+            icon = phraseToIcon("plus")
         if any(x in tag for x in tags):
-            if word=="can't":
-                icon=phraseToIcon("not")
-            elif word == "are" or word == "is":
+            if word == "can't":
+                icon = phraseToIcon("not")
+            elif word == "don't":
+                icon = phraseToIcon("not")
+            elif word == "are" or word == "is" or word == "am":
                 icon = phraseToIcon("equals")
+            elif word == "of":
+                icon = phraseToIcon("")
+            elif word == "into":
+                icon = phraseToIcon("right")
+            elif word == "things":
+                icon = phraseToIcon("stuff")
+
 
             else:
                 index = text.find(word, index, len(text))
                 icon = phraseToIcon(word)
-            txt+=f'<img width="20px"src="{icon}">'
-        progress+=1
+        txt += f'<img width="20px"src="{icon}">'
+        progress += 1
     return txt
-words=takeCommand().lower()
-pictoStr=textToPict(words,["NOUN","VERB","ADJ","ADV","PRON"])
+
+
+words = takeCommand().lower()
+pictoStr = textToPict(words, ["NOUN", "VERB", "ADJ", "ADV", "PRON", "ADP"])
 #
 # inital.destroy()
 print(pictoStr)
 
 window.title('Hello Python')
 window.geometry("300x200+10+20")
-picto=HTMLLabel(window,html=pictoStr,width=270,height=170)
+picto = HTMLLabel(window, html=pictoStr, width=270, height=170)
 picto.pack(pady=20, padx=20)
+
+
 def update():
     picto.set_html(html=pictoStr)
     window.after(1000, update)
+
+
 update()
 window.mainloop()
