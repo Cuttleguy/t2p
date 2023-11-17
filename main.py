@@ -47,7 +47,7 @@ def takeCommand():
         except Exception as e:
             print(e)
             print("Say that again sir")
-            return None
+            return takeCommand()
 
         return Query
 
@@ -90,7 +90,7 @@ def textToPict(text, tags):
     index = 0
     progress = 0
     txt = ""
-    ws_ts = pos_tag(text.split(), tagset="universal")
+    ws_ts = pos_tag(nltk.tokenize.word_tokenize(text), tagset="universal")
     for word, tag in ws_ts:
         print(f'{word}, {tag}')
         icon = ""
@@ -99,11 +99,15 @@ def textToPict(text, tags):
         elif word == "and":
             icon = phraseToIcon("plus")
         if any(x in tag for x in tags):
-            if word == "can't":
-                icon = phraseToIcon("not")
-            elif word == "don't":
-                icon = phraseToIcon("not")
-            elif word == "are" or word == "is" or word == "am":
+            if word == "ca":
+                icon = phraseToIcon("can")
+            elif word=="n't":
+                icon=phraseToIcon("no")
+            elif word=="wo":
+                icon=phraseToIcon("will")
+            # elif word == "don't":
+            #     icon = phraseToIcon("no")
+            elif word == "are" or word == "is" or word == "am" or word=="'m":
                 icon = phraseToIcon("equals")
             elif word == "of":
                 icon = phraseToIcon("")
